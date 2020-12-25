@@ -11,10 +11,10 @@ git clone https://github.com/eloitor/NixOS-config /etc/nixos
 ## Fresh installation:
 
  1. Download and install the ISO that you prefer from https://nixos.org/download.html#nixos-iso.
- 2. Follow installation instructions until https://nixos.org/manual/nixos/stable/index.html#sec-installation-installing
+ 2. Follow installation instructions until `nixos-generate-config --root /mnt` 
  3. Get the configuration
  ```bash
- git clone https://github.com/eloitor/NixOS-config /etc/nixos
+ git clone https://github.com/eloitor/NixOS-config /mnt/etc/nixos
  ```
  4. Change the configuration to your needs.
    - UEFI / Legacy
@@ -24,4 +24,5 @@ git clone https://github.com/eloitor/NixOS-config /etc/nixos
  ```bash
  nixos-install 
  ```
+ 6. reboot
 
