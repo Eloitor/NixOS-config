@@ -69,6 +69,7 @@
       # Only keep the last 500MiB of systemd journal.
       journald.extraConfig = "SystemMaxUse=500M";
   };
+  nix.autoOptimiseStore = true;
 
   # Enable sound.
   sound.enable = true;
@@ -78,11 +79,18 @@
   services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.eloi = {
+  users.users.eloi_nix = {
+    home = "/home/eloi_nix";
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager"]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "networkmanager" "shared" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.fish;
+    uid = 1000;
+    initialPassword = "eloi";
   };
+  users.groups.shared = {
+  	gid = 1001;
+  };
+
   security.doas.enable = true;
 
   # PACKAGES 
@@ -96,7 +104,7 @@
     git curl
     tree htop
     #neofetch
-    rg #ripgrep
+    ripgrep
     lf # file explorer
     home-manager
 
@@ -112,6 +120,7 @@
     sxhkd # Hotkey daemon
     
   ];
+  environment.sessionVariables.EDITOR = "nvim";
 
   programs = {
     zsh.ohMyZsh = {
