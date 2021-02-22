@@ -3,8 +3,9 @@
 
 This is the configuration for my NixOS system.
 
+```bash
 git clone https://github.com/eloitor/NixOS-config /etc/nixos
-
+```
 
 
 
@@ -26,3 +27,13 @@ git clone https://github.com/eloitor/NixOS-config /etc/nixos
  ```
  6. reboot
 
+## Maintainance
+
+ 1. Edit yout configuration:
+ ```bash
+ sudo nixos-rebuild edit
+ ```
+ 2. Update
+ ```bash
+ sudo nixos-rebuild switch
+ ```
