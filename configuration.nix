@@ -3,28 +3,21 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-{
-
-
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+{ imports = [ ./hardware-configuration.nix ]; # Include results of the hardware scan.
 
   # Use the GRUB 2 boot loader.
-  boot.loader = {
-    grub.enable = true;
-    grub.version = 2;
-    grub.device = "/dev/sda"; # or "nodev" for efi only
-    grub.useOSProber = true; # Find other OS
+  boot.loader.grub = {
+    enable = true;
+    version = 2;
+    device = "/dev/sda"; # or "nodev" for efi only
+    useOSProber = true; # Find other OS
   };
+ # services.acpid.enable = true;
 
   networking = {
     hostName = "nixos";
     # wireless.enable = true;  # Wireless via wpa_supplicant. incompatible with networkmanager
     networkmanager.enable = true;
-
-    firewall.enable = false;
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
@@ -46,28 +39,26 @@
 
   services = {
       xserver = {
+	enable = true;
         exportConfiguration = true;
 
 	## Configure keymap in X11
-        # layout = "us,it";
-        layout = "es";
-	xkbVariant = "cat";
+        layout = "es,ara";
+	xkbVariant = "cat,buckwalter";
         xkbOptions = "eurosign:e, compose:menu, grp:alt_space_toggle";
 	
-	# Enable the plasma 5 Desktop Environment. 
-	enable = true;
+	# Choose Display Manager / Window Manager / Desktop Environment. 
 	# displayManager.sddm.enable = true;         
-	# desktopManager.plasma5.enable = true;
 	displayManager.lightdm.enable = true;         
         windowManager.awesome.enable = true;
+        desktopManager.xfce.enable = true;
       };
 
       # Enable CUPS to print documents.
       printing.enable = true;
 
-      # Performance
-      # Only keep the last 500MiB of systemd journal.
-      journald.extraConfig = "SystemMaxUse=500M";
+      # Only keep the last 50MiB of systemd journal.
+      journald.extraConfig = "SystemMaxUse=50M";
   };
   nix.autoOptimiseStore = true;
 
@@ -75,61 +66,63 @@
   sound.enable = true;
   hardware.pulseaudio.enable = true;
 
-  # Enable touchpad support (enabled default in most desktopManager).
+  # Enable xbacklight for users in the video group
+  hardware.acpilight.enable = true;
+
+  # Enable touchpad support (enabled by default in most desktopManager).
   services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.eloi_nix = {
     home = "/home/eloi_nix";
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "shared" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "networkmanager" "shared" "video" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.fish;
     uid = 1000;
-    initialPassword = "eloi";
   };
-  users.groups.shared = {
-  	gid = 1001;
-  };
+  users.groups.shared.gid = 1001; # I use this id for the group shared in all distros
 
   security.doas.enable = true;
+  # security.sudo.enable = false;
 
   # PACKAGES 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    time
-    doas # Root provileges
-    #nox # Package manager
-    wget neovim
-    git curl
-    tree htop
-    #neofetch
-    ripgrep
-    lf # file explorer
     home-manager
-
-# Internet
+    acpilight # xbacklight - Not needed in version 21.5
+    time wget neovim git curl tree htop ripgrep
+    lf                # File manager
     brave qutebrowser
-
-# Terminal
-    alacritty
-    zsh dash fish
-#    r-mathpix
-    zathura # minimalist PDF viewer
-
-    sxhkd # Hotkey daemon
-    
+    kitty             # Terminal
+    zsh dash fish     # Shells
   ];
   environment.sessionVariables.EDITOR = "nvim";
 
-  programs = {
-    zsh.ohMyZsh = {
-      enable = true;
-      plugins = [ "man" ];
-      theme = "agnoster";
+  programs = { 
+    zsh = {
+      ohMyZsh = {
+        enable = true;
+        plugins = [ "man" ];
+        theme = "agnoster"; 
+      };
+      syntaxHighlighting.enable = true;
+      enableCompletion = true; 
+      autosuggestions.strategy = "match_prev_cmd";
     };
     fish.enable = true;
   };
+  
+  fonts.fonts = with pkgs; [
+    (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Terminus" ]; })
+    cozette
+    dina-font
+    noto-fonts
+    cascadia-code
+    noto-fonts-cjk
+    noto-fonts-emoji
+    terminus_font_ttf
+  ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
@@ -138,6 +131,4 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "20.09"; # Did you read the comment?
-
 }
-
