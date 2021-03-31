@@ -3,12 +3,10 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-{ imports = [ ./hardware-configuration.nix ]; # Include results of the hardware scan.
+{ imports = [ ./hardware-configuration.nix ]; # Include results of the hardware scan.
 
   # Use the GRUB 2 boot loader.
   boot.loader.grub = {
-    enable = true;
-    version = 2;
     device = "/dev/sda"; # or "nodev" for efi only
     useOSProber = true; # Find other OS
   };
@@ -75,32 +73,29 @@
     home = "/home/eloi_nix";
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" "shared" "video" ]; # Enable ‘sudo’ for the user.
-    shell = pkgs.fish;
+    shell = pkgs.fish; # don't forget to enable it!
     uid = 1000;
   };
   users.groups.shared.gid = 1001; # I use this id for the group shared in all distros
 
-  security.doas.enable = true;
-
   # Allow execution of any command by any user in group wheel, requiring
   # a password and keeping any previously-defined environment variables.
+  security.doas.enable = true;
   security.doas.extraRules = [{ groups = [ "wheel" ]; noPass = false; keepEnv = true; }];
 
+  programs.fish.enable = true;
   # PACKAGES 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     home-manager
     acpilight # xbacklight - Not needed in version 21.5
-    time wget neovim git curl tree htop ripgrep
-    brave qutebrowser
-    kitty             # Terminal
-    zsh dash fish     # Shells
+    wget neovim git curl htop ripgrep # Some utils
+    brave  # Browser
+    kitty  # Terminal
   ];
   environment.sessionVariables.EDITOR = "nvim";
 
-  programs.fish.enable = true;
-  
   fonts.fonts = with pkgs; [
     (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Terminus" ]; })
     cozette
