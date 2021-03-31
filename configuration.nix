@@ -12,7 +12,6 @@
     device = "/dev/sda"; # or "nodev" for efi only
     useOSProber = true; # Find other OS
   };
- # services.acpid.enable = true;
 
   networking = {
     hostName = "nixos";
@@ -48,7 +47,6 @@
         xkbOptions = "eurosign:e, compose:menu, grp:alt_space_toggle";
 	
 	# Choose Display Manager / Window Manager / Desktop Environment. 
-	# displayManager.sddm.enable = true;         
 	displayManager.lightdm.enable = true;         
         windowManager.awesome.enable = true;
         desktopManager.xfce.enable = true;
@@ -83,7 +81,10 @@
   users.groups.shared.gid = 1001; # I use this id for the group shared in all distros
 
   security.doas.enable = true;
-  # security.sudo.enable = false;
+
+  # Allow execution of any command by any user in group wheel, requiring
+  # a password and keeping any previously-defined environment variables.
+  security.doas.extraRules = [{ groups = [ "wheel" ]; noPass = false; keepEnv = true; }];
 
   # PACKAGES 
   # List packages installed in system profile. To search, run:
@@ -92,26 +93,13 @@
     home-manager
     acpilight # xbacklight - Not needed in version 21.5
     time wget neovim git curl tree htop ripgrep
-    lf                # File manager
     brave qutebrowser
     kitty             # Terminal
     zsh dash fish     # Shells
   ];
   environment.sessionVariables.EDITOR = "nvim";
 
-  programs = { 
-    zsh = {
-      ohMyZsh = {
-        enable = true;
-        plugins = [ "man" ];
-        theme = "agnoster"; 
-      };
-      syntaxHighlighting.enable = true;
-      enableCompletion = true; 
-      autosuggestions.strategy = "match_prev_cmd";
-    };
-    fish.enable = true;
-  };
+  programs.fish.enable = true;
   
   fonts.fonts = with pkgs; [
     (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Terminus" ]; })
